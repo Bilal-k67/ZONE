@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlayPass — Scan in, play, walk out</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #12172B;
+    --surface: #1B2242;
+    --surface-2: #232C52;
+    --gold: #F0B429;
+    --paper: #F3F1E9;
+    --muted: #8894BB;
+  }
+
+  body {
+    background-color: var(--ink);
+    color: var(--paper);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  .navbar-brand {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--paper) !important;
+  }
+  .navbar-brand .dot { color: var(--gold); }
+
+  .nav-link {
+    color: var(--muted) !important;
+  }
+  .nav-link:hover { color: var(--paper) !important; }
+
+  .btn-gold {
+    background-color: var(--gold);
+    color: var(--ink);
+    font-weight: 600;
+    border: none;
+  }
+  .btn-gold:hover {
+    background-color: #ffc94d;
+    color: var(--ink);
+  }
+
+  .btn-outline-paper {
+    color: var(--paper);
+    border: 1px solid rgba(243,241,233,0.35);
+    font-weight: 500;
+  }
+  .btn-outline-paper:hover {
+    background-color: rgba(243,241,233,0.08);
+    color: var(--paper);
+  }
+
+  /* --- Hero --- */
+  .hero-copy h1 {
+    font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+  }
+  .hero-copy p.lead {
+    color: var(--muted);
+    max-width: 34ch;
+  }
+
+  /* --- The ticket --- */
+  .ticket {
+    background-color: var(--surface);
+    border-radius: 4px;
+    position: relative;
+    display: flex;
+    max-width: 420px;
+  }
+  .ticket-main {
+    flex: 1 1 auto;
+    padding: 1.75rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+  .ticket-stub {
+    flex: 0 0 118px;
+    border-left: 2px dashed rgba(243,241,233,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    position: relative;
+  }
+  .ticket-stub .qr {
+    width: 80px;
+    height: 80px;
+    background:
+      repeating-conic-gradient(var(--ink) 0% 25%, transparent 0% 50%) 0 0/16px 16px,
+      var(--paper);
+    border-radius: 4px;
+    border: 6px solid var(--paper);
+  }
+  .punch {
+    width: 16px;
+    height: 16px;
+    background-color: var(--ink);
+    border-radius: 50%;
+    position: absolute;
+    left: -9px;
+  }
+  .punch.top { top: -9px; }
+  .punch.bottom { bottom: -9px; }
+
+  .ticket-label {
+    text-transform: none;
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.02em;
+  }
+  .ticket-station {
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+  .ticket-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: var(--muted);
+    border-top: 1px solid rgba(243,241,233,0.1);
+    padding-top: 0.75rem;
+  }
+  .ticket-row span:last-child {
+    color: var(--paper);
+  }
+
+  /* --- Steps --- */
+  .step {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }
+  .step-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--ink);
+    background-color: var(--gold);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .step h3 { font-size: 1.15rem; margin-bottom: 0.35rem; }
+  .step p { color: var(--muted); margin-bottom: 0; }
+
+  /* --- Feature stubs --- */
+  .feature {
+    background-color: var(--surface);
+    border-radius: 4px;
+    padding: 1.6rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    border-top: 3px solid var(--gold);
+  }
+  .feature h3 { font-size: 1.1rem; margin-bottom: 0; }
+  .feature p { color: var(--muted); margin-bottom: 0; font-size: 0.95rem; }
+
+  /* --- Loyalty strip --- */
+  .tier {
+    background-color: var(--surface-2);
+    border-radius: 4px;
+    padding: 1.4rem;
+    text-align: center;
+  }
+  .tier .name { font-family: 'IBM Plex Mono', monospace; color: var(--gold); font-size: 0.85rem; }
+  .tier .perk { color: var(--muted); font-size: 0.9rem; margin-top: 0.4rem; }
+
+  section { padding: 5rem 0; }
+  hr.divider {
+    border-top: 1px dashed rgba(243,241,233,0.15);
+    margin: 0;
+  }
+
+  footer {
+    color: var(--muted);
+    font-size: 0.9rem;
+    padding: 2.5rem 0;
+  }
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-md py-3">
+  <div class="container d-flex justify-content-between align-items-center">
+    <a class="navbar-brand" href="#">Play<span class="dot">•</span>Pass</a>
+    <div class="d-none d-md-flex align-items-center gap-4">
+      <a class="nav-link" href="#how">How it works</a>
+      <a class="nav-link" href="#features">Features</a>
+      <a class="nav-link" href="#loyalty">Loyalty</a>
+    </div>
+    <a href="#stations" class="btn btn-gold btn-sm px-3">Find a station</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="pt-4 pb-5">
+  <div class="container">
+    <div class="d-flex flex-column flex-lg-row align-items-center gap-5">
+
+      <div class="hero-copy flex-shrink-0">
+        <p class="mono ticket-label mb-2">NO. GATE — 24 HR ACCESS</p>
+        <h1 class="mb-3">Your seat is booked the second you scan.</h1>
+        <p class="lead">Every station gets its own code. Scan it, play, and the bill closes itself when you leave — no counter, no queue, no cash to count.</p>
+        <div class="d-flex flex-wrap gap-3 mt-4">
+          <a href="#stations" class="btn btn-gold px-4 py-2">Scan a station</a>
+          <a href="#how" class="btn btn-outline-paper px-4 py-2">See how it works</a>
+        </div>
+      </div>
+
+      <div class="ticket flex-shrink-0">
+        <div class="punch top"></div>
+        <div class="ticket-main">
+          <p class="ticket-label mono mb-0">SESSION PASS</p>
+          <p class="ticket-station mb-0">Station PC-07</p>
+          <div class="ticket-row">
+            <span>Rate</span>
+            <span class="mono">PKR 60 / hr</span>
+          </div>
+          <div class="ticket-row">
+            <span>Member</span>
+            <span>Bilal K.</span>
+          </div>
+          <div class="ticket-row">
+            <span>Status</span>
+            <span>Session live</span>
+          </div>
+        </div>
+        <div class="ticket-stub">
+          <div class="qr"></div>
+        </div>
+        <div class="punch bottom"></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start mb-5 gap-3">
+      <h2 class="mb-0" style="font-size:2rem;">How a session runs</h2>
+      <p class="ticket-label mono mb-0">THREE STEPS, NO STAFF NEEDED</p>
+    </div>
+    <div class="d-flex flex-column flex-md-row gap-4">
+      <div class="step flex-fill">
+        <div class="step-num mono">1</div>
+        <div>
+          <h3>Scan the station</h3>
+          <p>Every PC and console has its own code taped to the desk. Scanning it opens that machine's session page — not anyone else's.</p>
+        </div>
+      </div>
+      <div class="step flex-fill">
+        <div class="step-num mono">2</div>
+        <div>
+          <h3>Play, timer runs</h3>
+          <p>The session starts the moment you confirm. A running total shows on screen so there's never a surprise at checkout.</p>
+        </div>
+      </div>
+      <div class="step flex-fill">
+        <div class="step-num mono">3</div>
+        <div>
+          <h3>Walk out, it's settled</h3>
+          <p>End the session and the balance is deducted automatically. Your visit is logged toward your next reward.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <h2 class="mb-5" style="font-size:2rem;">Built for the counter, not around it</h2>
+    <div class="row g-4">
+      <div class="col-12 col-md-4">
+        <div class="feature">
+          <h3>Auto billing</h3>
+          <p>Time is tracked to the minute and charged from a prepaid balance — no manual stopwatch, no arguing over minutes.</p>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="feature">
+          <h3>Loyalty on autopilot</h3>
+          <p>Every session counts toward a member's tier automatically. Regulars get recognized without anyone checking a ledger.</p>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="feature">
+          <h3>Live station map</h3>
+          <p>See which stations are free, occupied, or reserved at a glance — from any device, not just the front counter.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- LOYALTY -->
+<section id="loyalty">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start mb-5 gap-3">
+      <h2 class="mb-0" style="font-size:2rem;">Loyalty tiers</h2>
+      <p class="ticket-label mono mb-0">EARNED BY HOURS PLAYED</p>
+    </div>
+    <div class="row g-4 text-start">
+      <div class="col-12 col-md-4">
+        <div class="tier">
+          <p class="name mb-0">BRONZE — 0–10 HRS</p>
+          <p class="perk">Standard rate, session history saved</p>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="tier">
+          <p class="name mb-0">SILVER — 10–30 HRS</p>
+          <p class="perk">15 free minutes added to every session</p>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="tier">
+          <p class="name mb-0">GOLD — 30+ HRS</p>
+          <p class="perk">Priority booking and one free hour monthly</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<footer>
+  <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+    <span>Play<span style="color:var(--gold)">•</span>Pass — a class project</span>
+    <span class="mono">v0.1</span>
+  </div>
+</footer>
+
+</body>
+</html>
